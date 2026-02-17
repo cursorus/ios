@@ -8,32 +8,33 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" id="webClipIcon" href="icon.png">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
     <title>iOS Home</title>
     <style>
         :root {
-            /* --- ОСНОВНЫЕ ПАРАМЕТРЫ --- */
-            --icon-size: 85px;             /* Размер иконок */
-            --icon-radius: 22px;           /* Скругление иконок */
+            --icon-size: 85px;
+            --icon-radius: 22px;
             
-            --screen-padding-top: 110px;    /* Отступ экрана сверху */
-            --screen-padding-bottom: 20px; /* Базовый отступ экрана снизу */
-            --screen-padding-left: 40px;   /* Отступ экрана слева */
-            --screen-padding-right: 40px;  /* Отступ экрана справа */
+            --screen-padding-top: 110px;
+            --screen-padding-bottom: 20px;
+            --screen-padding-left: 40px;
+            --screen-padding-right: 40px;
             
-            --gap-x: 20px;                 /* Расстояние между иконками по горизонтали */
-            --gap-y: 25px;                 /* Расстояние между иконками по вертикали */
+            --gap-x: 20px;
+            --gap-y: 25px;
 
-            --app-name-size: 16px;         /* Размер шрифта названия приложения */
+            --app-name-size: 16px;
             
-            --dock-margin-top: 10px;       /* Отступ дока сверху (от поиска) */
-            --dock-margin-side: 10px;      /* Отступы дока по бокам */
-            --dock-inner-padding: 15px;    /* Внутренний отступ дока (вокруг иконок) */
+            --dock-margin-top: 10px;
+            --dock-margin-side: 10px; /* 10px от краев экрана */
+            --dock-inner-padding: 15px;
 
-            /* --- ПАРАМЕТРЫ МОДАЛКИ --- */
             --modal-bg: rgba(28, 28, 30, 0.95);
             --modal-input-bg: rgba(58, 58, 60, 1);
             --modal-text: #ffffff;
             --accent-color: #0A84FF;
+            --delete-color: #FF3B30;
         }
 
         * {
@@ -71,27 +72,48 @@
             display: flex; overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            padding-top: var(--screen-padding-top);
+            padding: var(--screen-padding-top) var(--screen-padding-left) 0 var(--screen-padding-right);
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
-            min-width: 100vw;
-            scroll-snap-align: center;
+            min-width: calc(100vw - var(--screen-padding-left) - var(--screen-padding-right));
             display: grid;
             grid-template-columns: repeat(4, var(--icon-size));
             grid-template-rows: repeat(6, auto);
-            justify-content: center;
+            justify-content: space-between;
             align-content: flex-start;
             row-gap: var(--gap-y);
             column-gap: var(--gap-x);
-            padding: 0 var(--screen-padding-left);
+            margin-right: calc(var(--screen-padding-left) + var(--screen-padding-right));
+            scroll-snap-align: start;
+        }
+
+        /* Контейнер для свайпа */
+        .swipe-container {
+            position: relative;
+            width: var(--icon-size);
+            overflow: visible;
+        }
+
+        .delete-bg {
+            position: absolute; top: 0; right: 0; bottom: 30px; /* До текста */
+            width: 100%; background: var(--delete-color);
+            border-radius: var(--icon-radius);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 15px; color: white; font-weight: bold;
+            opacity: 0; transition: opacity 0.2s;
+            z-index: 1;
         }
 
         .app-item {
+            position: relative;
             width: var(--icon-size);
             display: flex; flex-direction: column;
             align-items: center; gap: 6px;
+            z-index: 2;
+            transition: transform 0.1s ease-out;
+            background: transparent;
         }
 
         .app-icon {
@@ -139,7 +161,7 @@
             backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
         }
 
-        /* --- МОДАЛЬНОЕ ОКНО --- */
+        /* МОДАЛКА */
         #uploadModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--modal-bg);
@@ -149,15 +171,13 @@
             padding: 20px; padding-top: env(safe-area-inset-top);
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { margin: 0; font-size: 20px; }
         .btn-done { color: var(--accent-color); font-weight: 600; cursor: pointer; }
 
         .modal-content { flex: 1; overflow-y: auto; }
-        .prefix-section { margin-bottom: 25px; }
         .input-ios {
             width: 100%; background: var(--modal-input-bg);
             border: none; border-radius: 10px; padding: 12px;
-            color: white; font-size: 16px; margin-top: 8px;
+            color: white; font-size: 16px; margin-top: 8px; margin-bottom: 15px;
         }
         .file-row {
             display: flex; align-items: center; gap: 15px;
@@ -189,14 +209,12 @@
     <div id="uploadModal">
         <div class="modal-header">
             <div class="btn-done" onclick="closeUpload()">Cancel</div>
-            <h2>Prepare Icons</h2>
-            <div class="btn-done" onclick="downloadAll()">Download</div>
+            <h2 id="modalTitle">Icons</h2>
+            <div class="btn-done" onclick="downloadAsZip()">Download ZIP</div>
         </div>
         <div class="modal-content">
-            <div class="prefix-section">
-                <label>Global Prefix (e.g. TBank)</label>
-                <input type="text" id="globalPrefix" class="input-ios" placeholder="Enter prefix...">
-            </div>
+            <label>Prefix (e.g. TBank)</label>
+            <input type="text" id="globalPrefix" class="input-ios" placeholder="TBank">
             <div id="fileList"></div>
         </div>
     </div>
@@ -205,7 +223,7 @@
         <div class="pages-container" id="pagesContainer"></div>
 
         <div class="search-container" id="btnEdit">
-            <span>Edit</span>
+            <span>Edit Mode</span>
         </div>
 
         <div class="dock-wrapper">
@@ -215,14 +233,12 @@
                         <img src="config.png" onerror="this.parentElement.style.background='#444'">
                     </div>
                 </div>
-
                 <div class="app-item" id="btnFiles" onclick="document.getElementById('fileInput').click()">
                     <div class="app-icon" style="background: #222;">
                         <img src="file.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3767/3767084.png'">
                     </div>
                 </div>
                 <input type="file" id="fileInput" multiple hidden accept="image/*">
-
                 <div id="dockApps" style="display:contents"></div>
             </div>
         </div>
@@ -284,31 +300,86 @@
                 const page = document.createElement('div');
                 page.className = 'page';
                 appState.slice(i * 24, (i + 1) * 24).forEach((app, idx) => {
-                    page.appendChild(createAppNode(app, i * 24 + idx));
+                    page.appendChild(createSwipeNode(app, i * 24 + idx));
                 });
                 container.appendChild(page);
             }
         }
 
-        function createAppNode(app, index) {
-            const div = document.createElement('div');
-            div.className = `app-item ${isEditMode ? 'shaking' : ''}`;
-            div.innerHTML = `
+        function createSwipeNode(app, index) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'swipe-container';
+            
+            const delBg = document.createElement('div');
+            delBg.className = 'delete-bg';
+            delBg.innerHTML = '✕';
+            
+            const item = document.createElement('div');
+            item.className = `app-item ${isEditMode ? 'shaking' : ''}`;
+            item.innerHTML = `
                 <div class="app-icon"><img src="${app.src}" draggable="false"></div>
                 <div class="app-name">${app.displayName}</div>
             `;
+
+            let startX = 0;
+            let currentX = 0;
+            const threshold = -60;
+            const deleteLimit = -150;
+
+            item.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                item.style.transition = 'none';
+            });
+
+            item.addEventListener('touchmove', e => {
+                currentX = e.touches[0].clientX - startX;
+                if (currentX > 0) currentX = 0;
+                
+                item.style.transform = `translateX(${currentX}px)`;
+                delBg.style.opacity = Math.abs(currentX) / 60;
+
+                if (currentX < deleteLimit) {
+                    delBg.style.background = 'white';
+                    delBg.style.color = 'red';
+                } else {
+                    delBg.style.background = 'var(--delete-color)';
+                    delBg.style.color = 'white';
+                }
+            });
+
+            item.addEventListener('touchend', () => {
+                item.style.transition = 'transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+                
+                if (currentX < deleteLimit) {
+                    // Удаление
+                    appState.splice(index, 1);
+                    wrapper.style.transition = 'all 0.3s';
+                    wrapper.style.transform = 'scale(0)';
+                    wrapper.style.opacity = '0';
+                    setTimeout(render, 300);
+                } else if (currentX < threshold) {
+                    item.style.transform = `translateX(${threshold}px)`;
+                } else {
+                    item.style.transform = `translateX(0)`;
+                    delBg.style.opacity = 0;
+                }
+            });
+
             if (isEditMode) {
-                div.onclick = () => {
-                    const item = appState.splice(index, 1)[0];
-                    appState.unshift(item);
+                item.onclick = () => {
+                    const moved = appState.splice(index, 1)[0];
+                    appState.unshift(moved);
                     render();
                 };
             }
-            return div;
+
+            wrapper.appendChild(delBg);
+            wrapper.appendChild(item);
+            return wrapper;
         }
 
-        // --- ЛОГИКА ЗАГРУЗКИ ФАЙЛОВ ---
-        document.getElementById('fileInput').onchange = (e) => {
+        // --- МОДАЛКА И ФАЙЛЫ ---
+        document.getElementById('fileInput').onchange = async (e) => {
             const files = Array.from(e.target.files);
             if (!files.length) return;
             
@@ -320,7 +391,6 @@
 
             const list = document.getElementById('fileList');
             list.innerHTML = '';
-            
             selectedFiles.forEach(item => {
                 const row = document.createElement('div');
                 row.className = 'file-row';
@@ -332,7 +402,6 @@
                 `;
                 list.appendChild(row);
             });
-
             document.getElementById('uploadModal').style.display = 'flex';
         };
 
@@ -341,25 +410,33 @@
             if (item) item.customName = val;
         }
 
-        function closeUpload() {
-            document.getElementById('uploadModal').style.display = 'none';
-            document.getElementById('fileInput').value = '';
-        }
-
-        function downloadAll() {
+        async function downloadAsZip() {
+            const zip = new JSZip();
             const prefix = document.getElementById('globalPrefix').value.trim();
             const fullPrefix = prefix ? prefix + '_' : '';
 
-            selectedFiles.forEach(item => {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').innerText = 'Zipping...';
+
+            for (const item of selectedFiles) {
                 const ext = item.file.name.split('.').pop();
                 const finalName = `${fullPrefix}${item.customName}.${ext}`;
-                
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(item.file);
-                a.download = finalName;
-                a.click();
-            });
+                zip.file(finalName, item.file);
+            }
+
+            const content = await zip.generateAsync({type: "blob"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(content);
+            a.download = "icons.zip";
+            a.click();
+            
+            document.getElementById('loading').style.display = 'none';
             closeUpload();
+        }
+
+        function closeUpload() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('fileInput').value = '';
         }
 
         document.getElementById('btnEdit').onclick = () => {
