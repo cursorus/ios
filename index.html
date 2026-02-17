@@ -3,151 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" id="webClipIcon" href="icon.png">
+    
     <title>iOS Home</title>
     <style>
+        :root {
+            /* --- ТВОИ ПАРАМЕТРЫ ТУТ --- */
+            --icon-size: 65px;             /* Размер иконок */
+            --icon-radius: 15px;           /* Скругление иконок */
+            
+            --screen-padding-top: 50px;    /* Отступ сверху */
+            --screen-padding-bottom: 20px; /* Отступ снизу */
+            --screen-padding-left: 25px;   /* Отступ слева */
+            --screen-padding-right: 25px;  /* Отступ справа */
+            
+            --gap-x: 20px;                 /* Расстояние между иконками по горизонтали */
+            --gap-y: 25px;                 /* Расстояние между иконками по вертикали */
+            /* -------------------------- */
+        }
+
+        * {
+            -webkit-touch-callout: none;   /* Запрет вызова меню на иконках */
+            -webkit-user-select: none;      /* Запрет выделения текста */
+            user-select: none;
+            outline: none;
+        }
+
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: #000;
-            display: flex; justify-content: center; align-items: center;
-            font-family: "SF Pro", -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        /* Основной контейнер-фрейм */
-        .iphone-frame {
-            width: 402px; height: 874px;
-            position: relative;
-            border-radius: 32px;
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
             overflow: hidden;
+            background: #000;
+            font-family: "SF Pro", -apple-system, sans-serif;
+            /* Запрет скролла и "резинки" в iOS */
+            overscroll-behavior: none; 
         }
 
-        /* Обои */
         .wallpaper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('wallpaper.jpg'), url('wallpaper.png');
             background-size: cover; background-position: center;
             z-index: 0;
         }
 
-        /* Контент поверх обоев */
         .screen-content {
             position: relative; z-index: 1;
             width: 100%; height: 100%;
             display: flex; flex-direction: column;
-            align-items: center;
+            box-sizing: border-box;
         }
 
-        /* Статус-бар */
-        .status-bar {
-            width: 100%; height: 90px; padding-top: 21px;
-            display: flex; flex-direction: column; box-sizing: border-box;
-        }
-
-        /* Сетка иконок */
         .pages-container {
-            width: 344px; flex: 1;
+            flex: 1;
             display: flex; overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
+            /* Применяем отступы экрана */
+            padding: var(--screen-padding-top) var(--screen-padding-left) 0 var(--screen-padding-right);
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
-            min-width: 344px;
+            min-width: calc(100vw - var(--screen-padding-left) - var(--screen-padding-right));
             display: grid;
-            grid-template-columns: repeat(4, 72px);
-            grid-template-rows: repeat(6, 79px);
+            /* 4 колонки */
+            grid-template-columns: repeat(4, var(--icon-size));
+            grid-template-rows: repeat(6, auto);
             justify-content: space-between;
             align-content: flex-start;
-            row-gap: 20px;
+            row-gap: var(--gap-y);
+            column-gap: var(--gap-x);
+            margin-right: calc(var(--screen-padding-left) + var(--screen-padding-right));
         }
 
         .app-item {
-            width: 72px; display: flex; flex-direction: column;
-            align-items: center; gap: 5px; cursor: pointer;
+            width: var(--icon-size);
+            display: flex; flex-direction: column;
+            align-items: center; gap: 6px;
         }
 
         .app-icon {
-            width: 60px; height: 60px; border-radius: 14px;
+            width: var(--icon-size); height: var(--icon-size);
+            border-radius: var(--icon-radius);
             overflow: hidden; background: rgba(255,255,255,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .app-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+        .app-icon img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            /* Исправление: картинку нельзя схватить отдельно */
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
 
         .app-name {
-            width: 100%; text-align: center; color: white; font-size: 12px;
-            font-weight: 510; text-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            width: 100%; text-align: center; color: white;
+            font-size: 11px; font-weight: 500;
+            text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.8);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         /* Поиск */
         .search-container {
-            height: 30px; margin-bottom: 10px;
-            padding: 7px 11px; border-radius: 100px;
-            background: linear-gradient(0deg, #666 0%, #666 100%), rgba(51, 51, 51, 0.35);
-            background-blend-mode: color_dodge, normal;
-            backdrop-filter: blur(75px); -webkit-backdrop-filter: blur(75px);
-            display: flex; align-items: center; gap: 10px;
-            color: white; font-size: 12px; font-weight: 590;
+            align-self: center;
+            height: 28px; margin: 10px 0;
+            padding: 0 15px; border-radius: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px;
         }
 
         /* Док */
         .dock-wrapper {
-            align-self: stretch; padding: 10px 12px 12px;
+            padding: 10px 15px calc(var(--screen-padding-bottom) + env(safe-area-inset-bottom));
             display: flex; justify-content: center;
         }
         .dock {
-            width: 100%; padding: 19px 21px;
-            border-radius: 42px; position: relative; overflow: hidden;
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(0deg, #666 0%, #666 100%), rgba(51, 51, 51, 0.35);
-            background-blend-mode: color_dodge, normal;
-            backdrop-filter: blur(75px); -webkit-backdrop-filter: blur(75px);
+            width: 100%; max-width: 350px; padding: 15px;
+            border-radius: 35px;
+            display: flex; justify-content: space-around; align-items: center;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
         }
 
-        /* Тряска при редактировании */
         .shaking { animation: shake 0.3s infinite ease-in-out; }
         @keyframes shake {
-            0%, 100% { transform: rotate(-1.5deg); }
+            0% { transform: rotate(-1.5deg); }
             50% { transform: rotate(1.5deg); }
+            100% { transform: rotate(-1.5deg); }
         }
 
         #loading {
-            position: absolute; top: 100px; color: white; z-index: 10; font-size: 14px; display: none;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            color: white; z-index: 100; font-size: 12px; background: rgba(0,0,0,0.5);
+            padding: 4px 12px; border-radius: 10px; display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="iphone-frame">
-        <div class="wallpaper"></div>
-        <div id="loading">Loading...</div>
+    <div class="wallpaper"></div>
+    <div id="loading">Sync...</div>
 
-        <div class="screen-content">
-            <div class="status-bar">
-                <div style="display: flex; justify-content: space-between; padding: 0 16px; align-items: center;">
-                    <div style="color: white; font-size: 17px; font-weight: 590;" id="clock">9:41</div>
-                    <div style="display: flex; gap: 7px; align-items: center;">
-                        <div style="width: 19px; height: 12px; background: white;"></div>
-                        <div style="width: 25px; height: 13px; border: 1px white solid; border-radius: 4px; opacity: 0.35;"></div>
+    <div class="screen-content">
+        <div class="pages-container" id="pagesContainer"></div>
+
+        <div class="search-container" id="btnEdit">
+            <span>Search</span>
+        </div>
+
+        <div class="dock-wrapper">
+            <div class="dock">
+                <div class="app-item" id="btnConfig">
+                    <div class="app-icon" style="background: #333;">
+                        <img src="config.png" onerror="this.parentElement.style.background='#444'">
                     </div>
                 </div>
-            </div>
-
-            <div class="pages-container" id="pagesContainer"></div>
-
-            <div class="search-container" id="btnEdit">
-                <span>􀊫 Search / Edit</span>
-            </div>
-
-            <div class="dock-wrapper">
-                <div class="dock">
-                    <div class="app-item" id="btnConfig">
-                        <div class="app-icon"><img src="config.png" onerror="this.src='https://placehold.co/60x60?text=Config'"></div>
-                    </div>
-                    <div id="dockApps" style="display:contents"></div>
-                </div>
+                <div id="dockApps" style="display:contents"></div>
             </div>
         </div>
     </div>
@@ -161,11 +178,9 @@
         let appState = [];
         let isEditMode = false;
 
-        // Логика именования: игнорируем 1-е слово и всё после 2-го
         function formatName(filename) {
             let name = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_/g, ' ');
             let parts = name.trim().split(/\s+/);
-            // Берем только второе слово, если оно есть
             return parts.length >= 2 ? parts[1] : parts[0];
         }
 
@@ -219,12 +234,11 @@
             const div = document.createElement('div');
             div.className = `app-item ${isEditMode ? 'shaking' : ''}`;
             div.innerHTML = `
-                <div class="app-icon"><img src="${app.src}"></div>
+                <div class="app-icon"><img src="${app.src}" draggable="false"></div>
                 <div class="app-name">${app.displayName}</div>
             `;
             if (isEditMode) {
                 div.onclick = () => {
-                    // Простая перестановка вперед при клике в режиме правки
                     const item = appState.splice(index, 1)[0];
                     appState.unshift(item);
                     render();
@@ -233,15 +247,6 @@
             return div;
         }
 
-        // Обновление времени
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Кнопки управления
         document.getElementById('btnEdit').onclick = () => {
             isEditMode = !isEditMode;
             render();
