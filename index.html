@@ -11,23 +11,30 @@
     <title>iOS Home</title>
     <style>
         :root {
-            /* --- ТВОИ ПАРАМЕТРЫ ТУТ --- */
+            /* --- ОСНОВНЫЕ ПАРАМЕТРЫ --- */
             --icon-size: 85px;             /* Размер иконок */
             --icon-radius: 20px;           /* Скругление иконок */
             
-            --screen-padding-top: 110px;    /* Отступ сверху */
-            --screen-padding-bottom: 20px; /* Отступ снизу */
-            --screen-padding-left: 40px;   /* Отступ слева */
-            --screen-padding-right: 40px;  /* Отступ справа */
+            --screen-padding-top: 110px;    /* Отступ экрана сверху */
+            --screen-padding-bottom: 20px; /* Базовый отступ экрана снизу */
+            --screen-padding-left: 40px;   /* Отступ экрана слева */
+            --screen-padding-right: 40px;  /* Отступ экрана справа */
             
             --gap-x: 20px;                 /* Расстояние между иконками по горизонтали */
             --gap-y: 25px;                 /* Расстояние между иконками по вертикали */
+
+            /* --- НОВЫЕ ПАРАМЕТРЫ --- */
+            --app-name-size: 11px;         /* Размер шрифта названия приложения */
+            
+            --dock-margin-top: 10px;       /* Отступ дока сверху (от поиска) */
+            --dock-margin-side: 15px;      /* Отступы дока по бокам */
+            --dock-inner-padding: 15px;    /* Внутренний отступ дока (вокруг иконок) */
             /* -------------------------- */
         }
 
         * {
-            -webkit-touch-callout: none;   /* Запрет вызова меню на иконках */
-            -webkit-user-select: none;      /* Запрет выделения текста */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
             user-select: none;
             outline: none;
         }
@@ -38,7 +45,6 @@
             overflow: hidden;
             background: #000;
             font-family: "SF Pro", -apple-system, sans-serif;
-            /* Запрет скролла и "резинки" в iOS */
             overscroll-behavior: none; 
         }
 
@@ -61,7 +67,6 @@
             display: flex; overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            /* Применяем отступы экрана */
             padding: var(--screen-padding-top) var(--screen-padding-left) 0 var(--screen-padding-right);
         }
         .pages-container::-webkit-scrollbar { display: none; }
@@ -69,7 +74,6 @@
         .page {
             min-width: calc(100vw - var(--screen-padding-left) - var(--screen-padding-right));
             display: grid;
-            /* 4 колонки */
             grid-template-columns: repeat(4, var(--icon-size));
             grid-template-rows: repeat(6, auto);
             justify-content: space-between;
@@ -95,19 +99,18 @@
         .app-icon img {
             width: 100%; height: 100%;
             object-fit: cover;
-            /* Исправление: картинку нельзя схватить отдельно */
             pointer-events: none;
             -webkit-user-drag: none;
         }
 
         .app-name {
             width: 100%; text-align: center; color: white;
-            font-size: 11px; font-weight: 500;
+            font-size: var(--app-name-size); 
+            font-weight: 500;
             text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.8);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* Поиск */
         .search-container {
             align-self: center;
             height: 28px; margin: 10px 0;
@@ -118,13 +121,14 @@
             color: white; font-size: 12px;
         }
 
-        /* Док */
         .dock-wrapper {
-            padding: 10px 15px calc(var(--screen-padding-bottom) + env(safe-area-inset-bottom));
+            /* Используем переменные для отступов дока */
+            padding: var(--dock-margin-top) var(--dock-margin-side) calc(var(--screen-padding-bottom) + env(safe-area-inset-bottom));
             display: flex; justify-content: center;
         }
         .dock {
-            width: 100%; max-width: 350px; padding: 15px;
+            width: 100%; max-width: 350px; 
+            padding: var(--dock-inner-padding);
             border-radius: 35px;
             display: flex; justify-content: space-around; align-items: center;
             background: rgba(255, 255, 255, 0.25);
