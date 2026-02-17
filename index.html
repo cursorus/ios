@@ -8,194 +8,146 @@
     <link rel="apple-touch-icon" id="webClipIcon" href="icon.png">
     <title>iOS Home</title>
     <style>
-        :root {
-            --app-size: 60px;
-            --app-radius: 13px;
-            --bg-dark: rgba(28, 28, 28, 0.9);
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            font-family: "SF Pro", -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        body {
-            background-color: #000;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            width: 100vw;
+        /* Основной контейнер-фрейм */
+        .iphone-frame {
+            width: 402px; height: 874px;
+            position: relative;
+            border-radius: 32px;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
+        /* Обои */
         .wallpaper {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('wallpaper.jpg'), url('wallpaper.png'), black;
-            background-size: cover;
-            background-position: center;
-            z-index: -1;
-            transform: scale(1.1); /* Небольшой зум для эффекта параллакса */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('wallpaper.jpg'), url('wallpaper.png');
+            background-size: cover; background-position: center;
+            z-index: 0;
         }
 
+        /* Контент поверх обоев */
+        .screen-content {
+            position: relative; z-index: 1;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center;
+        }
+
+        /* Статус-бар */
+        .status-bar {
+            width: 100%; height: 90px; padding-top: 21px;
+            display: flex; flex-direction: column; box-sizing: border-box;
+        }
+
+        /* Сетка иконок */
         .pages-container {
-            flex: 1;
-            display: flex;
-            overflow-x: auto;
+            width: 344px; flex: 1;
+            display: flex; overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            padding-top: 60px; /* Место под время и челку */
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
-            min-width: 100vw;
+            min-width: 344px;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(6, min-content);
-            align-content: start;
-            justify-items: center;
-            row-gap: 24px;
-            column-gap: 15px;
-            padding: 0 10px;
-            box-sizing: border-box;
+            grid-template-columns: repeat(4, 72px);
+            grid-template-rows: repeat(6, 79px);
+            justify-content: space-between;
+            align-content: flex-start;
+            row-gap: 20px;
         }
 
         .app-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            width: 75px;
-            text-decoration: none;
+            width: 72px; display: flex; flex-direction: column;
+            align-items: center; gap: 5px; cursor: pointer;
         }
 
         .app-icon {
-            width: var(--app-size);
-            height: var(--app-size);
-            border-radius: var(--app-radius);
-            background: #1a1a1a; /* Тёмный фон иконки как на скрине */
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            width: 60px; height: 60px; border-radius: 14px;
+            overflow: hidden; background: rgba(255,255,255,0.1);
         }
-
-        .app-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: var(--app-radius);
-        }
+        .app-icon img { width: 100%; height: 100%; object-fit: cover; }
 
         .app-name {
-            font-size: 11px;
-            color: white;
-            text-align: center;
-            width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 400;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            width: 100%; text-align: center; color: white; font-size: 12px;
+            font-weight: 510; text-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* Эффект тряски */
-        .shaking { animation: shake 0.25s infinite ease-in-out; }
-        @keyframes shake {
-            0% { transform: rotate(-1deg); }
-            50% { transform: rotate(1.5deg); }
-            100% { transform: rotate(-1deg); }
+        /* Поиск */
+        .search-container {
+            height: 30px; margin-bottom: 10px;
+            padding: 7px 11px; border-radius: 100px;
+            background: linear-gradient(0deg, #666 0%, #666 100%), rgba(51, 51, 51, 0.35);
+            background-blend-mode: color_dodge, normal;
+            backdrop-filter: blur(75px); -webkit-backdrop-filter: blur(75px);
+            display: flex; align-items: center; gap: 10px;
+            color: white; font-size: 12px; font-weight: 590;
         }
 
-        /* Поиск (над доком) */
-        .search-pill {
-            margin: 10px auto;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: rgba(255, 255, 255, 0.8);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        /* Док */
+        .dock-wrapper {
+            align-self: stretch; padding: 10px 12px 12px;
+            display: flex; justify-content: center;
         }
-
-        /* Док-бар */
-        .dock-container {
-            padding: 0 20px 35px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         .dock {
-            background: rgba(45, 45, 45, 0.55);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 32px;
-            width: 100%;
-            max-width: 360px;
-            height: 92px;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            padding: 0 10px;
-            box-sizing: border-box;
+            width: 100%; padding: 19px 21px;
+            border-radius: 42px; position: relative; overflow: hidden;
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(0deg, #666 0%, #666 100%), rgba(51, 51, 51, 0.35);
+            background-blend-mode: color_dodge, normal;
+            backdrop-filter: blur(75px); -webkit-backdrop-filter: blur(75px);
         }
 
-        .control-btn {
-            width: var(--app-size);
-            height: var(--app-size);
-            border-radius: var(--app-radius);
-            background: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            cursor: pointer;
+        /* Тряска при редактировании */
+        .shaking { animation: shake 0.3s infinite ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: rotate(-1.5deg); }
+            50% { transform: rotate(1.5deg); }
         }
-
-        .control-btn img { width: 100%; height: 100%; object-fit: cover; }
-
-        .dots {
-            display: flex;
-            gap: 7px;
-            margin-bottom: 12px;
-        }
-        .dot { width: 7px; height: 7px; background: rgba(255,255,255,0.3); border-radius: 50%; }
-        .dot.active { background: white; }
 
         #loading {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 100; color: white; font-size: 12px; background: rgba(0,0,0,0.5);
-            padding: 5px 15px; border-radius: 20px; display: none;
+            position: absolute; top: 100px; color: white; z-index: 10; font-size: 14px; display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="wallpaper"></div>
-    <div id="loading">Syncing...</div>
+    <div class="iphone-frame">
+        <div class="wallpaper"></div>
+        <div id="loading">Loading...</div>
 
-    <div class="pages-container" id="pagesContainer"></div>
-    
-    <div class="search-pill">
-        <svg width="11" height="11" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 14.5L10.5 10.5M12.5 6.5C12.5 9.81371 9.81371 12.5 6.5 12.5C3.18629 12.5 0.5 9.81371 0.5 6.5C0.5 3.18629 3.18629 0.5 6.5 0.5C9.81371 0.5 12.5 3.18629 12.5 6.5Z" stroke="white" stroke-opacity="0.8"/></svg>
-        Search
-    </div>
-
-    <div class="dock-container">
-        <div class="dots" id="dotsContainer"></div>
-        <div class="dock">
-            <div class="control-btn" id="btnEdit">
-                <img src="edit.png" onerror="this.src='edit.jpg'; this.onerror=null;">
+        <div class="screen-content">
+            <div class="status-bar">
+                <div style="display: flex; justify-content: space-between; padding: 0 16px; align-items: center;">
+                    <div style="color: white; font-size: 17px; font-weight: 590;" id="clock">9:41</div>
+                    <div style="display: flex; gap: 7px; align-items: center;">
+                        <div style="width: 19px; height: 12px; background: white;"></div>
+                        <div style="width: 25px; height: 13px; border: 1px white solid; border-radius: 4px; opacity: 0.35;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="control-btn" id="btnConfig">
-                <img src="config.png" onerror="this.src='config.jpg'; this.onerror=null;">
+
+            <div class="pages-container" id="pagesContainer"></div>
+
+            <div class="search-container" id="btnEdit">
+                <span>􀊫 Search / Edit</span>
+            </div>
+
+            <div class="dock-wrapper">
+                <div class="dock">
+                    <div class="app-item" id="btnConfig">
+                        <div class="app-icon"><img src="config.png" onerror="this.src='https://placehold.co/60x60?text=Config'"></div>
+                    </div>
+                    <div id="dockApps" style="display:contents"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -208,7 +160,14 @@
 
         let appState = [];
         let isEditMode = false;
-        let dragSrcIndex = -1;
+
+        // Логика именования: игнорируем 1-е слово и всё после 2-го
+        function formatName(filename) {
+            let name = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_/g, ' ');
+            let parts = name.trim().split(/\s+/);
+            // Берем только второе слово, если оно есть
+            return parts.length >= 2 ? parts[1] : parts[0];
+        }
 
         async function init() {
             document.getElementById('loading').style.display = 'block';
@@ -220,12 +179,11 @@
                     .filter(f => f.type === 'file' && /\.(png|jpg|jpeg)$/i.test(f.name))
                     .map(f => ({
                         fileName: f.name,
-                        displayName: f.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
+                        displayName: formatName(f.name),
                         src: f.download_url
                     }));
 
-                const configUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${CONFIG_FILE}`;
-                const confRes = await fetch(configUrl);
+                const confRes = await fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${CONFIG_FILE}`);
                 if (confRes.ok) {
                     const order = await confRes.json();
                     const appMap = new Map(apps.map(a => [a.fileName, a]));
@@ -244,16 +202,10 @@
 
         function render() {
             const container = document.getElementById('pagesContainer');
-            const dots = document.getElementById('dotsContainer');
             container.innerHTML = '';
-            dots.innerHTML = '';
-
+            
             const pageCount = Math.ceil(appState.length / 24) || 1;
             for (let i = 0; i < pageCount; i++) {
-                const dot = document.createElement('div');
-                dot.className = `dot ${i === 0 ? 'active' : ''}`;
-                dots.appendChild(dot);
-
                 const page = document.createElement('div');
                 page.className = 'page';
                 appState.slice(i * 24, (i + 1) * 24).forEach((app, idx) => {
@@ -261,57 +213,35 @@
                 });
                 container.appendChild(page);
             }
-
-            container.onscroll = () => {
-                const idx = Math.round(container.scrollLeft / window.innerWidth);
-                Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === idx));
-            };
         }
 
         function createAppNode(app, index) {
             const div = document.createElement('div');
             div.className = `app-item ${isEditMode ? 'shaking' : ''}`;
-            div.dataset.index = index;
             div.innerHTML = `
                 <div class="app-icon"><img src="${app.src}"></div>
                 <div class="app-name">${app.displayName}</div>
             `;
-
             if (isEditMode) {
-                div.draggable = true;
-                div.onsendstart = (e) => dragSrcIndex = index;
-                div.addEventListener('dragstart', (e) => { dragSrcIndex = index; e.target.style.opacity = "0.5"; });
-                div.addEventListener('dragover', (e) => e.preventDefault());
-                div.addEventListener('drop', (e) => {
-                    const from = dragSrcIndex;
-                    const to = index;
-                    const item = appState.splice(from, 1)[0];
-                    appState.splice(to, 0, item);
+                div.onclick = () => {
+                    // Простая перестановка вперед при клике в режиме правки
+                    const item = appState.splice(index, 1)[0];
+                    appState.unshift(item);
                     render();
-                });
-                
-                // Touch support
-                div.addEventListener('touchstart', (e) => {
-                    if(!isEditMode) return;
-                    dragSrcIndex = index;
-                    div.style.transform = "scale(1.1)";
-                }, {passive: true});
-                
-                div.addEventListener('touchend', (e) => {
-                    div.style.transform = "scale(1)";
-                    const touch = e.changedTouches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.app-item');
-                    if (target && target !== div) {
-                        const to = parseInt(target.dataset.index);
-                        const item = appState.splice(dragSrcIndex, 1)[0];
-                        appState.splice(to, 0, item);
-                        render();
-                    }
-                });
+                };
             }
             return div;
         }
 
+        // Обновление времени
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Кнопки управления
         document.getElementById('btnEdit').onclick = () => {
             isEditMode = !isEditMode;
             render();
