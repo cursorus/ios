@@ -2,22 +2,16 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="iOS Home">
-    
     <link rel="apple-touch-icon" id="webClipIcon" href="icon.png">
-
-    <title>iOS Mockup</title>
+    <title>iOS Home</title>
     <style>
         :root {
-            --app-size: 64px;
-            --app-gap: 25px;
-            --col-count: 4;
-            --row-count: 6;
-            --text-color: white;
+            --app-size: 60px;
+            --app-radius: 13px;
+            --bg-dark: rgba(28, 28, 28, 0.9);
         }
 
         body {
@@ -27,308 +21,250 @@
             height: 100vh;
             width: 100vw;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            /* Предотвращаем скролл всей страницы */
-            overscroll-behavior: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* --- Wallpaper --- */
         .wallpaper {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('wallpaper.jpg'), linear-gradient(135deg, #1c1c1e, #3a3a3c);
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('wallpaper.jpg'), url('wallpaper.png'), black;
             background-size: cover;
             background-position: center;
             z-index: -1;
+            transform: scale(1.1); /* Небольшой зум для эффекта параллакса */
         }
 
-        /* --- Pages Container --- */
         .pages-container {
             flex: 1;
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            padding-top: 40px; 
+            padding-top: 60px; /* Место под время и челку */
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
             min-width: 100vw;
-            height: 100%;
-            scroll-snap-align: start;
             display: grid;
-            grid-template-columns: repeat(var(--col-count), 1fr);
-            grid-template-rows: repeat(var(--row-count), min-content);
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(6, min-content);
             align-content: start;
             justify-items: center;
-            row-gap: var(--app-gap);
+            row-gap: 24px;
+            column-gap: 15px;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
-        /* --- App Icons --- */
         .app-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            position: relative;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            cursor: pointer;
-            z-index: 10;
+            gap: 5px;
+            width: 75px;
+            text-decoration: none;
         }
 
         .app-icon {
             width: var(--app-size);
             height: var(--app-size);
-            border-radius: 14px;
-            background: rgba(255,255,255,0.1);
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            pointer-events: none; 
-            transition: transform 0.2s;
+            border-radius: var(--app-radius);
+            background: #1a1a1a; /* Тёмный фон иконки как на скрине */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
-        .app-item:active .app-icon { filter: brightness(0.7); }
 
         .app-icon img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: var(--app-radius);
         }
 
         .app-name {
-            font-size: 12px;
-            color: var(--text-color);
+            font-size: 11px;
+            color: white;
             text-align: center;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-            max-width: 74px;
+            width: 100%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* Edit Mode Animations */
-        .app-item.shaking .app-icon { animation: shake 0.3s infinite ease-in-out; }
-        
+        /* Эффект тряски */
+        .shaking { animation: shake 0.25s infinite ease-in-out; }
         @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(1.5deg); }
-            50% { transform: rotate(0deg); }
-            75% { transform: rotate(-1.5deg); }
-            100% { transform: rotate(0deg); }
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1.5deg); }
+            100% { transform: rotate(-1deg); }
         }
 
-        /* --- Dock --- */
-        .dock-wrapper {
-            padding: 20px;
-            padding-bottom: 30px;
+        /* Поиск (над доком) */
+        .search-pill {
+            margin: 10px auto;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             display: flex;
-            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Док-бар */
+        .dock-container {
+            padding: 0 20px 35px 20px;
+            display: flex;
             flex-direction: column;
             align-items: center;
-            /* Учет "челки" и зоны Home Indicator на iPhone */
-            padding-bottom: env(safe-area-inset-bottom, 30px);
         }
-
-        .dots {
-            display: flex; gap: 8px; margin-bottom: 15px;
-        }
-        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: white; transform: scale(1.2); }
 
         .dock {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border-radius: 35px;
+            background: rgba(45, 45, 45, 0.55);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 360px;
+            height: 92px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
-            width: 90%;
-            max-width: 400px;
-            height: 96px;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            width: var(--app-size);
+            height: var(--app-size);
+            border-radius: var(--app-radius);
+            background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+            cursor: pointer;
         }
-        .control-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+
         .control-btn img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .control-btn.active-mode {
-            box-shadow: 0 0 15px rgba(50, 255, 50, 0.5);
-            animation: pulse 2s infinite;
+
+        .dots {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 12px;
         }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .dot { width: 7px; height: 7px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+        .dot.active { background: white; }
 
         #loading {
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
-            border-radius: 20px; font-size: 12px; display: none; z-index: 1000;
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 100; color: white; font-size: 12px; background: rgba(0,0,0,0.5);
+            padding: 5px 15px; border-radius: 20px; display: none;
         }
     </style>
 </head>
 <body>
 
     <div class="wallpaper"></div>
-    <div id="loading">Загрузка...</div>
+    <div id="loading">Syncing...</div>
 
     <div class="pages-container" id="pagesContainer"></div>
     
-    <div class="dock-wrapper">
+    <div class="search-pill">
+        <svg width="11" height="11" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 14.5L10.5 10.5M12.5 6.5C12.5 9.81371 9.81371 12.5 6.5 12.5C3.18629 12.5 0.5 9.81371 0.5 6.5C0.5 3.18629 3.18629 0.5 6.5 0.5C9.81371 0.5 12.5 3.18629 12.5 6.5Z" stroke="white" stroke-opacity="0.8"/></svg>
+        Search
+    </div>
+
+    <div class="dock-container">
         <div class="dots" id="dotsContainer"></div>
         <div class="dock">
             <div class="control-btn" id="btnEdit">
-                <img src="edit.png" onerror="this.src='edit.jpg'; if(this.src.endsWith('.jpg')) this.onerror=null; else this.src='https://placehold.co/60x60/333/FFF?text=EDIT'">
+                <img src="edit.png" onerror="this.src='edit.jpg'; this.onerror=null;">
             </div>
-            
             <div class="control-btn" id="btnConfig">
-                <img src="config.png" onerror="this.src='config.jpg'; if(this.src.endsWith('.jpg')) this.onerror=null; else this.src='https://placehold.co/60x60/333/FFF?text=SAVE'">
+                <img src="config.png" onerror="this.src='config.jpg'; this.onerror=null;">
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // НАСТРОЙКИ GITHUB
-        // ==========================================
         const GITHUB_USERNAME = 'cursorus'; 
         const GITHUB_REPO = 'ios';    
         const IMAGES_FOLDER = 'images';  
         const CONFIG_FILE = 'config.json';
-        // ==========================================
 
         let appState = [];
         let isEditMode = false;
         let dragSrcIndex = -1;
-        let touchClone = null;
-
-        // --- INIT & SYNC ---
 
         async function init() {
-            // 1. Устанавливаем иконку WebClip (png или jpg)
-            setupWebClipIcon();
-
-            const loading = document.getElementById('loading');
-            loading.style.display = 'block';
-
+            document.getElementById('loading').style.display = 'block';
             try {
-                // 2. Получаем список картинок
-                const imagesUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${IMAGES_FOLDER}`;
-                const imgResponse = await fetch(imagesUrl);
-                if (!imgResponse.ok) throw new Error('Repo not found');
-                const filesData = await imgResponse.json();
+                const imgRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${IMAGES_FOLDER}`);
+                const files = await imgRes.json();
                 
-                let apps = filesData
+                let apps = files
                     .filter(f => f.type === 'file' && /\.(png|jpg|jpeg)$/i.test(f.name))
                     .map(f => ({
-                        id: f.name,
                         fileName: f.name,
-                        displayName: formatName(f.name),
+                        displayName: f.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
                         src: f.download_url
                     }));
 
-                // 3. Пробуем найти config.json
                 const configUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${CONFIG_FILE}`;
-                
-                try {
-                    const configResponse = await fetch(configUrl);
-                    if (configResponse.ok) {
-                        const orderList = await configResponse.json();
-                        
-                        const appMap = new Map(apps.map(a => [a.fileName, a]));
-                        const sortedApps = [];
-                        
-                        orderList.forEach(name => {
-                            if (appMap.has(name)) {
-                                sortedApps.push(appMap.get(name));
-                                appMap.delete(name);
-                            }
-                        });
-                        appMap.forEach(val => sortedApps.push(val));
-                        apps = sortedApps;
-                    }
-                } catch (e) { console.log('Config fetch failed, using default order'); }
-
+                const confRes = await fetch(configUrl);
+                if (confRes.ok) {
+                    const order = await confRes.json();
+                    const appMap = new Map(apps.map(a => [a.fileName, a]));
+                    const sorted = [];
+                    order.forEach(name => {
+                        if (appMap.has(name)) { sorted.push(appMap.get(name)); appMap.delete(name); }
+                    });
+                    appMap.forEach(v => sorted.push(v));
+                    apps = sorted;
+                }
                 appState = apps;
                 render();
-
-            } catch (error) {
-                console.error(error);
-                alert('Ошибка: ' + error.message);
-            } finally {
-                loading.style.display = 'none';
-            }
+            } catch (e) { console.error(e); }
+            document.getElementById('loading').style.display = 'none';
         }
-
-        // Логика подбора иконки для рабочего стола iOS
-        function setupWebClipIcon() {
-            const link = document.getElementById('webClipIcon');
-            const baseUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/`;
-            
-            // Проверяем наличие icon.png
-            const img = new Image();
-            img.onload = function() {
-                link.href = baseUrl + 'icon.png';
-            };
-            img.onerror = function() {
-                // Если png нет, ставим jpg
-                link.href = baseUrl + 'icon.jpg';
-            };
-            img.src = baseUrl + 'icon.png';
-        }
-
-        function formatName(filename) {
-            return filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_/g, ' ');
-        }
-
-        // --- RENDER ---
-        const APPS_PER_PAGE = 24;
 
         function render() {
             const container = document.getElementById('pagesContainer');
-            const dotsContainer = document.getElementById('dotsContainer');
-            
+            const dots = document.getElementById('dotsContainer');
             container.innerHTML = '';
-            dotsContainer.innerHTML = '';
+            dots.innerHTML = '';
 
-            const pageCount = Math.ceil(appState.length / APPS_PER_PAGE) || 1;
-
+            const pageCount = Math.ceil(appState.length / 24) || 1;
             for (let i = 0; i < pageCount; i++) {
                 const dot = document.createElement('div');
                 dot.className = `dot ${i === 0 ? 'active' : ''}`;
-                dotsContainer.appendChild(dot);
+                dots.appendChild(dot);
 
                 const page = document.createElement('div');
                 page.className = 'page';
-                
-                const chunk = appState.slice(i * APPS_PER_PAGE, (i + 1) * APPS_PER_PAGE);
-                chunk.forEach((app, idx) => {
-                    const globalIdx = i * APPS_PER_PAGE + idx;
-                    page.appendChild(createAppNode(app, globalIdx));
+                appState.slice(i * 24, (i + 1) * 24).forEach((app, idx) => {
+                    page.appendChild(createAppNode(app, i * 24 + idx));
                 });
                 container.appendChild(page);
             }
 
             container.onscroll = () => {
-                const pageIndex = Math.round(container.scrollLeft / window.innerWidth);
-                Array.from(dotsContainer.children).forEach((d, idx) => {
-                    d.classList.toggle('active', idx === pageIndex);
-                });
+                const idx = Math.round(container.scrollLeft / window.innerWidth);
+                Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === idx));
             };
         }
 
@@ -336,128 +272,61 @@
             const div = document.createElement('div');
             div.className = `app-item ${isEditMode ? 'shaking' : ''}`;
             div.dataset.index = index;
-
             div.innerHTML = `
-                <div class="app-icon"><img src="${app.src}" loading="lazy"></div>
+                <div class="app-icon"><img src="${app.src}"></div>
                 <div class="app-name">${app.displayName}</div>
             `;
 
             if (isEditMode) {
-                // Touch
-                div.addEventListener('touchstart', onTouchStart, {passive: false});
-                div.addEventListener('touchmove', onTouchMove, {passive: false});
-                div.addEventListener('touchend', onTouchEnd);
-                
-                // Mouse
                 div.draggable = true;
-                div.addEventListener('dragstart', (e) => {
-                    dragSrcIndex = index;
-                    e.dataTransfer.effectAllowed = 'move';
-                    div.style.opacity = '0.4';
-                });
-                div.addEventListener('dragend', (e) => {
-                    div.style.opacity = '1';
-                    render();
-                });
+                div.onsendstart = (e) => dragSrcIndex = index;
+                div.addEventListener('dragstart', (e) => { dragSrcIndex = index; e.target.style.opacity = "0.5"; });
                 div.addEventListener('dragover', (e) => e.preventDefault());
                 div.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const targetApp = e.target.closest('.app-item');
-                    if (targetApp && targetApp !== div) {
-                        reorder(dragSrcIndex, parseInt(targetApp.dataset.index));
+                    const from = dragSrcIndex;
+                    const to = index;
+                    const item = appState.splice(from, 1)[0];
+                    appState.splice(to, 0, item);
+                    render();
+                });
+                
+                // Touch support
+                div.addEventListener('touchstart', (e) => {
+                    if(!isEditMode) return;
+                    dragSrcIndex = index;
+                    div.style.transform = "scale(1.1)";
+                }, {passive: true});
+                
+                div.addEventListener('touchend', (e) => {
+                    div.style.transform = "scale(1)";
+                    const touch = e.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.app-item');
+                    if (target && target !== div) {
+                        const to = parseInt(target.dataset.index);
+                        const item = appState.splice(dragSrcIndex, 1)[0];
+                        appState.splice(to, 0, item);
+                        render();
                     }
                 });
-            } else {
-                div.onclick = () => console.log('Open:', app.fileName);
             }
             return div;
         }
 
-        // --- LOGIC ---
-
-        function reorder(from, to) {
-            const item = appState.splice(from, 1)[0];
-            appState.splice(to, 0, item);
-            render();
-        }
-
-        function onTouchStart(e) {
-            if (!isEditMode) return;
-            dragSrcIndex = parseInt(this.dataset.index);
-            const rect = this.getBoundingClientRect();
-            
-            touchClone = this.cloneNode(true);
-            touchClone.style.position = 'fixed';
-            touchClone.style.left = rect.left + 'px';
-            touchClone.style.top = rect.top + 'px';
-            touchClone.style.width = rect.width + 'px';
-            touchClone.style.height = rect.height + 'px';
-            touchClone.style.zIndex = '9999';
-            touchClone.style.pointerEvents = 'none';
-            touchClone.style.opacity = '0.8';
-            touchClone.classList.remove('shaking');
-            
-            document.body.appendChild(touchClone);
-            this.style.visibility = 'hidden';
-        }
-
-        function onTouchMove(e) {
-            if (!touchClone) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            touchClone.style.left = (touch.clientX - touchClone.offsetWidth / 2) + 'px';
-            touchClone.style.top = (touch.clientY - touchClone.offsetHeight / 2) + 'px';
-        }
-
-        function onTouchEnd(e) {
-            if (!touchClone) return;
-            const touch = e.changedTouches[0];
-            
-            touchClone.style.display = 'none';
-            let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            touchClone.remove();
-            touchClone = null;
-
-            const origin = document.querySelector(`.app-item[data-index="${dragSrcIndex}"]`);
-            if(origin) origin.style.visibility = 'visible';
-
-            const targetApp = elemBelow ? elemBelow.closest('.app-item') : null;
-            if (targetApp) {
-                const toIndex = parseInt(targetApp.dataset.index);
-                if (dragSrcIndex !== toIndex) reorder(dragSrcIndex, toIndex);
-            }
-        }
-
-        // --- CONTROLS ---
-
-        document.getElementById('btnEdit').addEventListener('click', () => {
+        document.getElementById('btnEdit').onclick = () => {
             isEditMode = !isEditMode;
-            const btn = document.getElementById('btnEdit');
-            isEditMode ? btn.classList.add('active-mode') : btn.classList.remove('active-mode');
             render();
-        });
+        };
 
-        document.getElementById('btnConfig').addEventListener('click', () => {
-            const order = appState.map(app => app.fileName);
-            const jsonStr = JSON.stringify(order, null, 2);
-            
-            const blob = new Blob([jsonStr], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
+        document.getElementById('btnConfig').onclick = () => {
+            const data = JSON.stringify(appState.map(a => a.fileName), null, 2);
+            const blob = new Blob([data], {type: 'application/json'});
             const a = document.createElement('a');
-            a.href = url;
-            a.download = CONFIG_FILE;
-            document.body.appendChild(a);
+            a.href = URL.createObjectURL(blob);
+            a.download = 'config.json';
             a.click();
-            document.body.removeChild(a);
-            
-            const btn = document.getElementById('btnConfig');
-            btn.style.transform = 'scale(0.8)';
-            setTimeout(() => btn.style.transform = 'scale(1)', 150);
-        });
+        };
 
-        // ЗАПУСК
         init();
-
     </script>
 </body>
 </html>
