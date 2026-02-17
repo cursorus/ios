@@ -23,13 +23,17 @@
             --gap-x: 20px;                 /* Расстояние между иконками по горизонтали */
             --gap-y: 25px;                 /* Расстояние между иконками по вертикали */
 
-            /* --- НОВЫЕ ПАРАМЕТРЫ --- */
             --app-name-size: 16px;         /* Размер шрифта названия приложения */
             
             --dock-margin-top: 10px;       /* Отступ дока сверху (от поиска) */
             --dock-margin-side: 10px;      /* Отступы дока по бокам */
             --dock-inner-padding: 15px;    /* Внутренний отступ дока (вокруг иконок) */
-            /* -------------------------- */
+
+            /* --- ПАРАМЕТРЫ МОДАЛКИ --- */
+            --modal-bg: rgba(28, 28, 30, 0.95);
+            --modal-input-bg: rgba(58, 58, 60, 1);
+            --modal-text: #ffffff;
+            --accent-color: #0A84FF;
         }
 
         * {
@@ -37,6 +41,7 @@
             -webkit-user-select: none;
             user-select: none;
             outline: none;
+            box-sizing: border-box;
         }
 
         body, html {
@@ -59,7 +64,6 @@
             position: relative; z-index: 1;
             width: 100%; height: 100%;
             display: flex; flex-direction: column;
-            box-sizing: border-box;
         }
 
         .pages-container {
@@ -67,20 +71,21 @@
             display: flex; overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            padding: var(--screen-padding-top) var(--screen-padding-left) 0 var(--screen-padding-right);
+            padding-top: var(--screen-padding-top);
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
-            min-width: calc(100vw - var(--screen-padding-left) - var(--screen-padding-right));
+            min-width: 100vw;
+            scroll-snap-align: center;
             display: grid;
             grid-template-columns: repeat(4, var(--icon-size));
             grid-template-rows: repeat(6, auto);
-            justify-content: space-between;
+            justify-content: center;
             align-content: flex-start;
             row-gap: var(--gap-y);
             column-gap: var(--gap-x);
-            margin-right: calc(var(--screen-padding-left) + var(--screen-padding-right));
+            padding: 0 var(--screen-padding-left);
         }
 
         .app-item {
@@ -122,7 +127,6 @@
         }
 
         .dock-wrapper {
-            /* Используем переменные для отступов дока */
             padding: var(--dock-margin-top) var(--dock-margin-side) calc(var(--screen-padding-bottom) + env(safe-area-inset-bottom));
             display: flex; justify-content: center;
         }
@@ -134,6 +138,34 @@
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
         }
+
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        #uploadModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-bg);
+            z-index: 1000; display: none;
+            flex-direction: column; color: var(--modal-text);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 20px; padding-top: env(safe-area-inset-top);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 20px; }
+        .btn-done { color: var(--accent-color); font-weight: 600; cursor: pointer; }
+
+        .modal-content { flex: 1; overflow-y: auto; }
+        .prefix-section { margin-bottom: 25px; }
+        .input-ios {
+            width: 100%; background: var(--modal-input-bg);
+            border: none; border-radius: 10px; padding: 12px;
+            color: white; font-size: 16px; margin-top: 8px;
+        }
+        .file-row {
+            display: flex; align-items: center; gap: 15px;
+            background: var(--modal-input-bg);
+            padding: 10px; border-radius: 12px; margin-bottom: 10px;
+        }
+        .file-preview { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        .file-name-input { flex: 1; background: transparent; border: none; color: white; font-size: 14px; }
 
         .shaking { animation: shake 0.3s infinite ease-in-out; }
         @keyframes shake {
@@ -154,6 +186,21 @@
     <div class="wallpaper"></div>
     <div id="loading">Sync...</div>
 
+    <div id="uploadModal">
+        <div class="modal-header">
+            <div class="btn-done" onclick="closeUpload()">Cancel</div>
+            <h2>Prepare Icons</h2>
+            <div class="btn-done" onclick="downloadAll()">Download</div>
+        </div>
+        <div class="modal-content">
+            <div class="prefix-section">
+                <label>Global Prefix (e.g. TBank)</label>
+                <input type="text" id="globalPrefix" class="input-ios" placeholder="Enter prefix...">
+            </div>
+            <div id="fileList"></div>
+        </div>
+    </div>
+
     <div class="screen-content">
         <div class="pages-container" id="pagesContainer"></div>
 
@@ -168,6 +215,14 @@
                         <img src="config.png" onerror="this.parentElement.style.background='#444'">
                     </div>
                 </div>
+
+                <div class="app-item" id="btnFiles" onclick="document.getElementById('fileInput').click()">
+                    <div class="app-icon" style="background: #222;">
+                        <img src="file.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3767/3767084.png'">
+                    </div>
+                </div>
+                <input type="file" id="fileInput" multiple hidden accept="image/*">
+
                 <div id="dockApps" style="display:contents"></div>
             </div>
         </div>
@@ -181,6 +236,7 @@
 
         let appState = [];
         let isEditMode = false;
+        let selectedFiles = [];
 
         function formatName(filename) {
             let name = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_/g, ' ');
@@ -249,6 +305,61 @@
                 };
             }
             return div;
+        }
+
+        // --- ЛОГИКА ЗАГРУЗКИ ФАЙЛОВ ---
+        document.getElementById('fileInput').onchange = (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            
+            selectedFiles = files.map(f => ({
+                file: f,
+                id: Math.random().toString(36).substr(2, 9),
+                customName: f.name.split('.')[0]
+            }));
+
+            const list = document.getElementById('fileList');
+            list.innerHTML = '';
+            
+            selectedFiles.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'file-row';
+                const url = URL.createObjectURL(item.file);
+                row.innerHTML = `
+                    <img src="${url}" class="file-preview">
+                    <input type="text" class="file-name-input" value="${item.customName}" 
+                           oninput="updateItemName('${item.id}', this.value)">
+                `;
+                list.appendChild(row);
+            });
+
+            document.getElementById('uploadModal').style.display = 'flex';
+        };
+
+        function updateItemName(id, val) {
+            const item = selectedFiles.find(f => f.id === id);
+            if (item) item.customName = val;
+        }
+
+        function closeUpload() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        }
+
+        function downloadAll() {
+            const prefix = document.getElementById('globalPrefix').value.trim();
+            const fullPrefix = prefix ? prefix + '_' : '';
+
+            selectedFiles.forEach(item => {
+                const ext = item.file.name.split('.').pop();
+                const finalName = `${fullPrefix}${item.customName}.${ext}`;
+                
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(item.file);
+                a.download = finalName;
+                a.click();
+            });
+            closeUpload();
         }
 
         document.getElementById('btnEdit').onclick = () => {
