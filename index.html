@@ -2,141 +2,96 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Mockup GitHub Edition</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iOS Home">
+    
+    <link rel="apple-touch-icon" id="webClipIcon" href="icon.png">
+
+    <title>iOS Mockup</title>
     <style>
         :root {
-            --app-size: 60px;
-            --app-gap: 20px;
+            --app-size: 64px;
+            --app-gap: 25px;
             --col-count: 4;
             --row-count: 6;
-            --page-padding: 20px;
             --text-color: white;
         }
 
         body {
-            background-color: #1e1e1e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: #000;
             margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, sans-serif;
-            overflow: hidden;
-        }
-
-        /* --- Controls UI --- */
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
+            /* Предотвращаем скролл всей страницы */
+            overscroll-behavior: none;
         }
 
-        .btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .btn:hover { background: rgba(255, 255, 255, 0.4); }
-        .btn.active { background: rgba(50, 200, 50, 0.6); border-color: #4f4; }
-        .btn.locked { background: rgba(200, 50, 50, 0.6); border-color: #f44; }
-
-        /* --- Phone Frame --- */
-        .phone-frame {
-            width: 402px;
-            height: 874px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 48px;
-            box-shadow: 0 0 0 10px #000, 0 0 50px rgba(0,0,0,0.5);
-            background: black;
-            display: flex;
-            flex-direction: column;
-        }
-
+        /* --- Wallpaper --- */
         .wallpaper {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            /* Пытаемся загрузить обои, если нет - градиент */
-            background-image: url('wallpaper.jpg'), url('wallpaper.png'), linear-gradient(135deg, #1c1c1e, #3a3a3c);
+            background-image: url('wallpaper.jpg'), linear-gradient(135deg, #1c1c1e, #3a3a3c);
             background-size: cover;
             background-position: center;
-            z-index: 0;
+            z-index: -1;
         }
 
-        .status-bar {
-            height: 44px;
-            width: 100%;
-            position: relative;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-bottom: 5px;
-            box-sizing: border-box;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-            padding-left: 30px;
-            padding-right: 30px;
-        }
-
+        /* --- Pages Container --- */
         .pages-container {
             flex: 1;
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            z-index: 5;
-            padding-top: 20px;
+            padding-top: 40px; 
         }
         .pages-container::-webkit-scrollbar { display: none; }
 
         .page {
-            min-width: 100%;
+            min-width: 100vw;
             height: 100%;
             scroll-snap-align: start;
             display: grid;
             grid-template-columns: repeat(var(--col-count), 1fr);
-            grid-template-rows: repeat(var(--row-count), auto);
+            grid-template-rows: repeat(var(--row-count), min-content);
             align-content: start;
-            padding: 0 20px;
-            box-sizing: border-box;
-            row-gap: 20px;
+            justify-items: center;
+            row-gap: var(--app-gap);
         }
 
+        /* --- App Icons --- */
         .app-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             position: relative;
             user-select: none;
-            -webkit-user-drag: none;
-            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            z-index: 10;
         }
 
         .app-icon {
             width: var(--app-size);
             height: var(--app-size);
             border-radius: 14px;
-            background: #333;
+            background: rgba(255,255,255,0.1);
             overflow: hidden;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            pointer-events: none; 
+            transition: transform 0.2s;
         }
+        
+        .app-item:active .app-icon { filter: brightness(0.7); }
 
         .app-icon img {
             width: 100%;
@@ -145,19 +100,20 @@
         }
 
         .app-name {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-color);
             text-align: center;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            max-width: 70px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            max-width: 74px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-weight: 400;
         }
 
-        .app-item.shaking { animation: shake 0.3s infinite ease-in-out; }
-        .app-item.dragging { opacity: 0.5; transform: scale(1.1); z-index: 100; }
-
+        /* Edit Mode Animations */
+        .app-item.shaking .app-icon { animation: shake 0.3s infinite ease-in-out; }
+        
         @keyframes shake {
             0% { transform: rotate(0deg); }
             25% { transform: rotate(1.5deg); }
@@ -166,145 +122,192 @@
             100% { transform: rotate(0deg); }
         }
 
-        .dock-wrapper { padding: 15px; z-index: 10; }
+        /* --- Dock --- */
+        .dock-wrapper {
+            padding: 20px;
+            padding-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            /* Учет "челки" и зоны Home Indicator на iPhone */
+            padding-bottom: env(safe-area-inset-bottom, 30px);
+        }
+
+        .dots {
+            display: flex; gap: 8px; margin-bottom: 15px;
+        }
+        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: white; transform: scale(1.2); }
+
         .dock {
             background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border-radius: 35px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 15px 10px;
-            height: 90px;
-            box-sizing: border-box;
+            width: 90%;
+            max-width: 400px;
+            height: 96px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .control-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+        .control-btn img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .control-btn.active-mode {
+            box-shadow: 0 0 15px rgba(50, 255, 50, 0.5);
+            animation: pulse 2s infinite;
         }
         
-        .dots { display: flex; justify-content: center; gap: 8px; padding-bottom: 10px; z-index: 10; }
-        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; }
-        .dot.active { background: white; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        /* Loading Spinner */
         #loading {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-family: sans-serif;
-            background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px;
-            z-index: 2000; display: none;
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 12px; display: none; z-index: 1000;
         }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <button id="lockBtn" class="btn locked">🔒 Locked</button>
-        <button id="downloadBtn" class="btn">Скачать order.json</button>
-        <label for="uploadInput" class="btn">Загрузить order.json</label>
-        <input type="file" id="uploadInput" accept=".json,.txt" style="display: none;">
-    </div>
+    <div class="wallpaper"></div>
+    <div id="loading">Загрузка...</div>
 
-    <div class="phone-frame">
-        <div id="loading">Сканирование GitHub...</div>
-        <div class="wallpaper"></div>
-        
-        <div class="status-bar">
-            <span>9:41</span>
-            <div style="display: flex; gap: 5px;">
-                <div style="width: 18px; height: 12px; background: white; -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z\'/></svg>') no-repeat center;"></div>
-                <div style="width: 20px; height: 12px; border: 1px solid rgba(255,255,255,0.5); border-radius: 4px; position: relative;">
-                    <div style="background: white; width: 14px; height: 8px; margin: 1px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="pages-container" id="pagesContainer"></div>
+    <div class="pages-container" id="pagesContainer"></div>
+    
+    <div class="dock-wrapper">
         <div class="dots" id="dotsContainer"></div>
-
-        <div class="dock-wrapper">
-            <div class="dock" id="dockContainer"></div>
+        <div class="dock">
+            <div class="control-btn" id="btnEdit">
+                <img src="edit.png" onerror="this.src='edit.jpg'; if(this.src.endsWith('.jpg')) this.onerror=null; else this.src='https://placehold.co/60x60/333/FFF?text=EDIT'">
+            </div>
+            
+            <div class="control-btn" id="btnConfig">
+                <img src="config.png" onerror="this.src='config.jpg'; if(this.src.endsWith('.jpg')) this.onerror=null; else this.src='https://placehold.co/60x60/333/FFF?text=SAVE'">
+            </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // НАСТРОЙКИ GITHUB (ЗАПОЛНИ ЭТО!)
+        // НАСТРОЙКИ GITHUB
         // ==========================================
-        const GITHUB_USERNAME = 'cursorus'; // Твой логин, например 'ivanov'
-        const GITHUB_REPO = 'ios';    // Название репозитория, например 'ios-mockup'
-        const FOLDER_PATH = 'images';            // Папка, где лежат иконки
+        const GITHUB_USERNAME = 'cursorus'; 
+        const GITHUB_REPO = 'ios';    
+        const IMAGES_FOLDER = 'images';  
+        const CONFIG_FILE = 'config.json';
         // ==========================================
 
-        const dockConfig = ['icon1', 'icon2', 'icon3', 'icon4']; 
-        
-        let appState = []; 
+        let appState = [];
         let isEditMode = false;
-        let dragSrcEl = null;
         let dragSrcIndex = -1;
+        let touchClone = null;
 
-        // --- GITHUB FETCH LOGIC ---
+        // --- INIT & SYNC ---
 
-        async function fetchImagesFromGitHub() {
-            const loadingEl = document.getElementById('loading');
-            loadingEl.style.display = 'block';
+        async function init() {
+            // 1. Устанавливаем иконку WebClip (png или jpg)
+            setupWebClipIcon();
 
-            const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FOLDER_PATH}`;
-            
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`Ошибка GitHub API: ${response.status}`);
+                // 2. Получаем список картинок
+                const imagesUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${IMAGES_FOLDER}`;
+                const imgResponse = await fetch(imagesUrl);
+                if (!imgResponse.ok) throw new Error('Repo not found');
+                const filesData = await imgResponse.json();
                 
-                const data = await response.json();
+                let apps = filesData
+                    .filter(f => f.type === 'file' && /\.(png|jpg|jpeg)$/i.test(f.name))
+                    .map(f => ({
+                        id: f.name,
+                        fileName: f.name,
+                        displayName: formatName(f.name),
+                        src: f.download_url
+                    }));
+
+                // 3. Пробуем найти config.json
+                const configUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${CONFIG_FILE}`;
                 
-                // Фильтруем только картинки (png, jpg, jpeg)
-                const imageFiles = data.filter(file => 
-                    file.type === 'file' && 
-                    /\.(png|jpg|jpeg)$/i.test(file.name)
-                );
+                try {
+                    const configResponse = await fetch(configUrl);
+                    if (configResponse.ok) {
+                        const orderList = await configResponse.json();
+                        
+                        const appMap = new Map(apps.map(a => [a.fileName, a]));
+                        const sortedApps = [];
+                        
+                        orderList.forEach(name => {
+                            if (appMap.has(name)) {
+                                sortedApps.push(appMap.get(name));
+                                appMap.delete(name);
+                            }
+                        });
+                        appMap.forEach(val => sortedApps.push(val));
+                        apps = sortedApps;
+                    }
+                } catch (e) { console.log('Config fetch failed, using default order'); }
 
-                // Преобразуем в наш формат
-                appState = imageFiles.map((file, index) => {
-                    return {
-                        id: `app-${index}`,
-                        fileName: file.name,
-                        displayName: parseName(file.name),
-                        src: file.download_url // GitHub API отдает прямую ссылку
-                    };
-                });
-
+                appState = apps;
                 render();
 
             } catch (error) {
                 console.error(error);
-                alert("Не удалось загрузить список файлов с GitHub. Проверь консоль (F12) и настройки USERNAME/REPO в коде.");
-                // Fallback (заглушка), чтобы хоть что-то показалось
-                appState = [];
-                render();
+                alert('Ошибка: ' + error.message);
             } finally {
-                loadingEl.style.display = 'none';
+                loading.style.display = 'none';
             }
         }
 
-        function parseName(filename) {
-            let namePart = filename.substring(0, filename.lastIndexOf('.'));
-            let parts = namePart.split('_');
-            if (parts.length > 1) {
-                parts.shift();
-                return parts.join(' ');
-            } else {
-                return namePart;
-            }
+        // Логика подбора иконки для рабочего стола iOS
+        function setupWebClipIcon() {
+            const link = document.getElementById('webClipIcon');
+            const baseUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/`;
+            
+            // Проверяем наличие icon.png
+            const img = new Image();
+            img.onload = function() {
+                link.href = baseUrl + 'icon.png';
+            };
+            img.onerror = function() {
+                // Если png нет, ставим jpg
+                link.href = baseUrl + 'icon.jpg';
+            };
+            img.src = baseUrl + 'icon.png';
         }
 
-        // --- RENDER & LOGIC ---
+        function formatName(filename) {
+            return filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_/g, ' ');
+        }
 
+        // --- RENDER ---
         const APPS_PER_PAGE = 24;
 
         function render() {
             const container = document.getElementById('pagesContainer');
             const dotsContainer = document.getElementById('dotsContainer');
+            
             container.innerHTML = '';
             dotsContainer.innerHTML = '';
 
             const pageCount = Math.ceil(appState.length / APPS_PER_PAGE) || 1;
-            
+
             for (let i = 0; i < pageCount; i++) {
                 const dot = document.createElement('div');
                 dot.className = `dot ${i === 0 ? 'active' : ''}`;
@@ -313,186 +316,147 @@
                 const page = document.createElement('div');
                 page.className = 'page';
                 
-                const start = i * APPS_PER_PAGE;
-                const end = start + APPS_PER_PAGE;
-                const pageApps = appState.slice(start, end);
-
-                pageApps.forEach((app, localIndex) => {
-                    const globalIndex = start + localIndex;
-                    page.appendChild(createAppElement(app, globalIndex));
+                const chunk = appState.slice(i * APPS_PER_PAGE, (i + 1) * APPS_PER_PAGE);
+                chunk.forEach((app, idx) => {
+                    const globalIdx = i * APPS_PER_PAGE + idx;
+                    page.appendChild(createAppNode(app, globalIdx));
                 });
-
                 container.appendChild(page);
             }
 
             container.onscroll = () => {
-                const pageIndex = Math.round(container.scrollLeft / container.clientWidth);
+                const pageIndex = Math.round(container.scrollLeft / window.innerWidth);
                 Array.from(dotsContainer.children).forEach((d, idx) => {
                     d.classList.toggle('active', idx === pageIndex);
                 });
             };
         }
 
-        function createAppElement(app, index) {
+        function createAppNode(app, index) {
             const div = document.createElement('div');
             div.className = `app-item ${isEditMode ? 'shaking' : ''}`;
             div.dataset.index = index;
-            div.draggable = isEditMode;
-
-            if (isEditMode) {
-                div.addEventListener('dragstart', handleDragStart);
-                div.addEventListener('dragover', handleDragOver);
-                div.addEventListener('drop', handleDrop);
-                div.addEventListener('dragend', handleDragEnd);
-                div.addEventListener('touchstart', handleTouchStart, {passive: false});
-                div.addEventListener('touchmove', handleTouchMove, {passive: false});
-                div.addEventListener('touchend', handleTouchEnd);
-            }
-
-            const img = new Image();
-            img.src = app.src;
-            img.onerror = function() { this.src = 'https://placehold.co/60x60?text=Error'; };
 
             div.innerHTML = `
-                <div class="app-icon"></div>
+                <div class="app-icon"><img src="${app.src}" loading="lazy"></div>
                 <div class="app-name">${app.displayName}</div>
             `;
-            div.querySelector('.app-icon').appendChild(img);
 
+            if (isEditMode) {
+                // Touch
+                div.addEventListener('touchstart', onTouchStart, {passive: false});
+                div.addEventListener('touchmove', onTouchMove, {passive: false});
+                div.addEventListener('touchend', onTouchEnd);
+                
+                // Mouse
+                div.draggable = true;
+                div.addEventListener('dragstart', (e) => {
+                    dragSrcIndex = index;
+                    e.dataTransfer.effectAllowed = 'move';
+                    div.style.opacity = '0.4';
+                });
+                div.addEventListener('dragend', (e) => {
+                    div.style.opacity = '1';
+                    render();
+                });
+                div.addEventListener('dragover', (e) => e.preventDefault());
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const targetApp = e.target.closest('.app-item');
+                    if (targetApp && targetApp !== div) {
+                        reorder(dragSrcIndex, parseInt(targetApp.dataset.index));
+                    }
+                });
+            } else {
+                div.onclick = () => console.log('Open:', app.fileName);
+            }
             return div;
         }
 
-        function renderDock() {
-            const dock = document.getElementById('dockContainer');
-            dock.innerHTML = '';
-            dockConfig.forEach((iconName, i) => {
-                const div = document.createElement('div');
-                div.className = 'app-item';
-                div.innerHTML = `
-                    <div class="app-icon" style="width: 60px; height: 60px;">
-                        <img src="${iconName}.png" onerror="this.src='${iconName}.jpg'; if(this.src.endsWith('.jpg')) this.onerror=null; else this.src='https://placehold.co/60x60?text=${i+1}'">
-                    </div>
-                `;
-                dock.appendChild(div);
-            });
-        }
+        // --- LOGIC ---
 
-        // --- DRAG & DROP ---
-
-        function handleDragStart(e) {
-            dragSrcEl = this;
-            dragSrcIndex = parseInt(this.dataset.index);
-            e.dataTransfer.effectAllowed = 'move';
-            this.classList.add('dragging');
-        }
-        function handleDragOver(e) { if (e.preventDefault) e.preventDefault(); return false; }
-        function handleDrop(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            const target = e.target.closest('.app-item');
-            if (dragSrcEl !== target && target) {
-                reorderApps(dragSrcIndex, parseInt(target.dataset.index));
-            }
-            return false;
-        }
-        function handleDragEnd(e) { this.classList.remove('dragging'); }
-
-        // Touch
-        let touchEl = null, touchClone = null;
-        function handleTouchStart(e) {
-            if (!isEditMode) return;
-            touchEl = this;
-            dragSrcIndex = parseInt(this.dataset.index);
-            const rect = this.getBoundingClientRect();
-            touchClone = this.cloneNode(true);
-            Object.assign(touchClone.style, {
-                position: 'fixed', top: rect.top+'px', left: rect.left+'px', 
-                opacity: '0.8', zIndex: '1000', pointerEvents: 'none'
-            });
-            touchClone.classList.remove('shaking');
-            document.body.appendChild(touchClone);
-            this.style.opacity = '0';
-        }
-        function handleTouchMove(e) {
-            if (!touchClone) return;
-            e.preventDefault();
-            const t = e.touches[0];
-            touchClone.style.left = (t.clientX - 30) + 'px';
-            touchClone.style.top = (t.clientY - 30) + 'px';
-        }
-        function handleTouchEnd(e) {
-            if (!touchClone) return;
-            const t = e.changedTouches[0];
-            touchClone.remove(); touchClone = null;
-            touchEl.style.opacity = '1';
-            touchEl.style.display = 'none';
-            let target = document.elementFromPoint(t.clientX, t.clientY);
-            touchEl.style.display = 'flex';
-            if (target) {
-                const app = target.closest('.app-item');
-                if (app && app !== touchEl) reorderApps(dragSrcIndex, parseInt(app.dataset.index));
-            }
-        }
-
-        function reorderApps(from, to) {
+        function reorder(from, to) {
             const item = appState.splice(from, 1)[0];
             appState.splice(to, 0, item);
             render();
         }
 
+        function onTouchStart(e) {
+            if (!isEditMode) return;
+            dragSrcIndex = parseInt(this.dataset.index);
+            const rect = this.getBoundingClientRect();
+            
+            touchClone = this.cloneNode(true);
+            touchClone.style.position = 'fixed';
+            touchClone.style.left = rect.left + 'px';
+            touchClone.style.top = rect.top + 'px';
+            touchClone.style.width = rect.width + 'px';
+            touchClone.style.height = rect.height + 'px';
+            touchClone.style.zIndex = '9999';
+            touchClone.style.pointerEvents = 'none';
+            touchClone.style.opacity = '0.8';
+            touchClone.classList.remove('shaking');
+            
+            document.body.appendChild(touchClone);
+            this.style.visibility = 'hidden';
+        }
+
+        function onTouchMove(e) {
+            if (!touchClone) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchClone.style.left = (touch.clientX - touchClone.offsetWidth / 2) + 'px';
+            touchClone.style.top = (touch.clientY - touchClone.offsetHeight / 2) + 'px';
+        }
+
+        function onTouchEnd(e) {
+            if (!touchClone) return;
+            const touch = e.changedTouches[0];
+            
+            touchClone.style.display = 'none';
+            let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            touchClone.remove();
+            touchClone = null;
+
+            const origin = document.querySelector(`.app-item[data-index="${dragSrcIndex}"]`);
+            if(origin) origin.style.visibility = 'visible';
+
+            const targetApp = elemBelow ? elemBelow.closest('.app-item') : null;
+            if (targetApp) {
+                const toIndex = parseInt(targetApp.dataset.index);
+                if (dragSrcIndex !== toIndex) reorder(dragSrcIndex, toIndex);
+            }
+        }
+
         // --- CONTROLS ---
 
-        const lockBtn = document.getElementById('lockBtn');
-        lockBtn.addEventListener('click', () => {
+        document.getElementById('btnEdit').addEventListener('click', () => {
             isEditMode = !isEditMode;
-            lockBtn.textContent = isEditMode ? '🔓 Unlocked' : '🔒 Locked';
-            lockBtn.classList.toggle('active', isEditMode);
-            lockBtn.classList.toggle('locked', !isEditMode);
+            const btn = document.getElementById('btnEdit');
+            isEditMode ? btn.classList.add('active-mode') : btn.classList.remove('active-mode');
             render();
         });
 
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const orderList = appState.map(app => app.fileName);
-            const blob = new Blob([JSON.stringify(orderList, null, 2)], {type: 'application/json'});
+        document.getElementById('btnConfig').addEventListener('click', () => {
+            const order = appState.map(app => app.fileName);
+            const jsonStr = JSON.stringify(order, null, 2);
+            
+            const blob = new Blob([jsonStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'order.json';
+            a.href = url;
+            a.download = CONFIG_FILE;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            
+            const btn = document.getElementById('btnConfig');
+            btn.style.transform = 'scale(0.8)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 150);
         });
 
-        document.getElementById('uploadInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const loadedNames = JSON.parse(e.target.result);
-                    // Перестраиваем appState на основе имен и текущих данных с GitHub
-                    // Сначала создаем map текущих загруженных
-                    const currentMap = new Map(appState.map(app => [app.fileName, app]));
-                    const newState = [];
-                    
-                    // Добавляем в порядке из файла
-                    loadedNames.forEach(name => {
-                        if (currentMap.has(name)) {
-                            newState.push(currentMap.get(name));
-                            currentMap.delete(name);
-                        }
-                    });
-                    
-                    // Добавляем новые/оставшиеся
-                    currentMap.forEach(val => newState.push(val));
-                    
-                    appState = newState;
-                    render();
-                } catch (err) { alert('Ошибка JSON'); }
-            };
-            reader.readAsText(file);
-        });
-
-        // --- INIT ---
-        renderDock();
-        // ВАЖНО: Запуск сканирования GitHub
-        fetchImagesFromGitHub();
+        // ЗАПУСК
+        init();
 
     </script>
 </body>
